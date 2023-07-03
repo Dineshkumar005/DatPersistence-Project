@@ -13,14 +13,13 @@ public class MainManager : MonoBehaviour
 
     public Text ScoreText;
     public Text HighScoreText;
-    public InputField NameInputField;
     public GameObject GameOverText;
 
     public bool m_GameOver = false;
 
     private bool m_Started = false;
     private int m_Points;
-    private int m_HighPoints;
+    private string m_PlayerName;
 
     // Start is called before the first frame update
     void Start()
@@ -40,8 +39,8 @@ public class MainManager : MonoBehaviour
             }
         }
 
-
-        LoadHighScore();
+        m_PlayerName = MainMenuScript.Instance.currentPlayerName;
+        HighScoreText.text ="Best Score : "+MainMenuScript.Instance.PlayerName+" : "+MainMenuScript.Instance.HighScore;
     }
 
     private void Update()
@@ -59,12 +58,11 @@ public class MainManager : MonoBehaviour
                 Ball.AddForce(forceDir * 2.0f, ForceMode.VelocityChange);
             }
         }
-        else if (m_GameOver && !NameInputField.isFocused)
+        else if (m_GameOver)
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
-                SaveHighScore();
-                Restart();
+                SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
             }
         }
     }
@@ -72,65 +70,17 @@ public class MainManager : MonoBehaviour
     void AddPoint(int point)
     {
         m_Points += point;
-        ScoreText.text = $"Score : {m_Points}";
+        ScoreText.text = $"Score : {m_PlayerName} : {m_Points}";
     }
 
     public void GameOver()
     {
-        if (m_Points > m_HighPoints)
+        if (m_Points > MainMenuScript.Instance.HighScore)
         {
-            NameInputField.gameObject.SetActive(true);
+            MainMenuScript.Instance.SaveHighScore(m_Points);
         }
 
         m_GameOver = true;
         GameOverText.SetActive(true);
-    }
-
-
-    [System.Serializable]
-    class HighScoreData
-    {
-        public string PlayerName;
-        public int Points;
-    }
-
-    void SaveHighScore()
-    {
-        HighScoreData data = new HighScoreData();
-        data.Points = m_Points;
-        string PlayerName = NameInputField.text;
-        if (PlayerName != null){
-            data.PlayerName = PlayerName;
-        }
-        else{
-            data.PlayerName = "Player";
-        }
-
-        string json = JsonUtility.ToJson(data);
-        string path = Application.persistentDataPath + "/UserData";
-        if (!Directory.Exists(path))
-        {
-            Directory.CreateDirectory(path);
-        }
-        File.WriteAllText(Application.persistentDataPath + "/UserData/highscoredata.json", json);
-    }
-
-    void LoadHighScore()
-    {
-        string path = Application.persistentDataPath + "/UserData/highscoredata.json";
-
-        if (File.Exists(path))
-        {
-            string json = File.ReadAllText(path);
-            HighScoreData data = JsonUtility.FromJson<HighScoreData>(json);
-
-            HighScoreText.text = "Best Score : " + data.PlayerName + " : " + data.Points;
-            m_HighPoints = data.Points;
-        }
-    }
-
-    public void Restart()
-    {
-        SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
     }
 }

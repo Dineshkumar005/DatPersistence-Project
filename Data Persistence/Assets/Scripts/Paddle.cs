@@ -10,15 +10,13 @@ public class Paddle : MonoBehaviour
 
     // Start is called before the first frame update
     void Start()
-    {
-        mainManager = GameObject.Find("MainManager").GetComponent<MainManager>();
+    {;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if(!mainManager.m_GameOver)
-        {
+        
             float input = Input.GetAxis("Horizontal");
 
             Vector3 pos = transform.position;
@@ -30,6 +28,6 @@ public class Paddle : MonoBehaviour
                 pos.x = -MaxMovement;
 
             transform.position = pos;
-        }
+        
     }
 }
